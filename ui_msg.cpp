@@ -408,7 +408,7 @@ static void ui_web_advanced_write(const char *body)
 		snprintf(s, sizeof(s), "/params/alarm/zone_%d/sensor", i);
 		sSecurity.zone[i].sensor = p.getInt(s, 0);
 	}
-
+	printf("register_url:%s\n", p.getText("/params/awtek/register_url"));
 	sys.awtek.url(0, p.getText("/params/awtek/register_url"));
 	sys.awtek.url(1, p.getText("/params/awtek/alarm_url"));
 	int alarm_freq = p.getInt("/params/awtek/alarm_freq", -1);

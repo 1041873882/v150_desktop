@@ -8,7 +8,6 @@ AdvanceWirelessHttp awtek_http;
 
 int response_callback(int code, std::string response)
 {
-	printf("response code:%d\n", code);
 	if (code == 200) {
 		const char *res = response.c_str();
 		cJSON *root, *result, *message;
@@ -73,7 +72,6 @@ int AdvanceWirelessHttp::send_message(int type, int io, int sensor)
 		cJSON_Delete(root);
 		return 0;
 	} else if (type == ALARM) {
-		printf("type == ALARM\n");
 		snprintf(url, sizeof(url), "%s?pid=%s&sensor=%d&io=%d", sys.awtek.url(1), pid, sensor, io);
 		headers.insert(make_pair("Content-Type", "application/json"));
 		return http_request.get(url, &headers, NULL, response_callback);

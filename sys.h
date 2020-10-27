@@ -236,8 +236,8 @@ public:
 	class __awtek {
 	public:
 		int m_alarm_freq;
-		char m_register_url[64];
-		char m_alarm_url[64];
+		char m_register_url[256];
+		char m_alarm_url[256];
 		char m_id_code[64];
 		char m_community_code[254];
 		

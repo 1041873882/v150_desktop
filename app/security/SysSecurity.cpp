@@ -10,6 +10,7 @@
 #include "SysSound.h"
 #include "SysCaller.h"
 #include "SysSecurity.h"
+#include "AdvanceWirelessHttp.h"
 
 SysSecurity sSecurity;
 
@@ -85,7 +86,7 @@ SysSecurity::SysSecurity()
 	sGpio io;
 	io.start("gpio_para", "hooter");
 	io.dir("gpio_para", "hooter", 1);
-	//¾¯µÑµ±×öµçÔ´
+	//ï¿½ï¿½ï¿½Ñµï¿½ï¿½ï¿½ï¿½ï¿½Ô´
 	io.set("gpio_para", "hooter", 1);
 
 	io.start("gpio_para", "4051_in0");
@@ -116,10 +117,19 @@ SysSecurity::SysSecurity()
 		m_io[i] = -1;
 
 	dsound.ts = 0;
+
+	retry_times = 0;
+	alarm_running = 0;
 }
 
 SysSecurity::~SysSecurity()
 {
+}
+
+void SysSecurity::cancel(void)
+{
+	retry_times = 0;
+	alarm_running = 0;
 }
 
 void SysSecurity::start(void)
@@ -179,7 +189,7 @@ void SysSecurity::do_process(void)
 					}
 				}
 				if (sys.talk.dcode()) {
-					//¸±·Ö»ú±¨¾¯Ö±½ÓÍ¬²½µ½Ö÷·Ö»ú
+					//ï¿½ï¿½ï¿½Ö»ï¿½ï¿½ï¿½ï¿½ï¿½Ö±ï¿½ï¿½Í¬ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö»ï¿½
 					int ok = 0;
 					for(int i=0; i<8; i++) {
 						if (io[i] != 0x10 && m_io[i] != io[i]) {
@@ -191,9 +201,9 @@ void SysSecurity::do_process(void)
 #ifdef SECURITY_SUB_16
 						int io_s[MAX_SECURITY_SZ];
 						for(int i=0; i<8; i++) {
-							io_s[i] = 0x10; //Ç°8·ÀÇø²»±ä
+							io_s[i] = 0x10; //Ç°8ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 
-							//ºó8·ÀÇøÓÃ¸±»ú×´Ì¬
+							//ï¿½ï¿½8ï¿½ï¿½ï¿½ï¿½ï¿½Ã¸ï¿½ï¿½ï¿½×´Ì¬
 							if (io[i] != 0x10 && m_io[i] != io[i]) {
 								io_s[8+i] = io[i];
 							} else {
@@ -224,9 +234,32 @@ void SysSecurity::do_process(void)
 			}
 		}
 
+		if (alarm_running) {
+			if ((time(NULL)-send_time) >= (sys.awtek.alarm_freq()*5)) {
+				if (++retry_times > 5) {
+					this->cancel();
+				} else {
+					send_time = time(NULL);
+					awtek_http.send_message(AdvanceWirelessHttp::ALARM, -1, 5);
+				}
+			}
+		}
+
 		this->do_dsound();
 		usleep(40*1000);
 	}
+}
+
+int SysSecurity::start_alarm(void)
+{
+	if (!alarm_running || (time(NULL)-send_time>1)) {
+		alarm_running = 1;
+		send_time = time(NULL);
+		retry_times = 0;
+		awtek_http.send_message(AdvanceWirelessHttp::ALARM, -1, 5);
+		return 0;
+	}
+	return -1;
 }
 
 void SysSecurity::process(int io[], int length)
@@ -237,9 +270,9 @@ void SysSecurity::process(int io[], int length)
 	int sync_ok = 0;
 	int bell = 0;
 	for(int i=0; i<length; i++) {
-		if (zone[i].mode == M_NO && io[i] == 0x01) //³£¿ª£¬io=1ÎªÕý³£×´Ì¬
+		if (zone[i].mode == M_NO && io[i] == 0x01) //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½io=1Îªï¿½ï¿½ï¿½ï¿½×´Ì¬
 			io[i] = 0x00;
-		else if (zone[i].mode == M_NC && io[i] == 0x02) //³£±Õ£¬io=2ÎªÕý³£×´Ì¬
+		else if (zone[i].mode == M_NC && io[i] == 0x02) //ï¿½ï¿½ï¿½Õ£ï¿½io=2Îªï¿½ï¿½ï¿½ï¿½×´Ì¬
 			io[i] = 0x00;
 	}
 
@@ -505,7 +538,7 @@ void SysSecurity::cms_alarm(int z)
 	p.setText("/params/event_url", "/msg/alarm/trigger");
 	p.setInt("/params/zone", z);
 	p.setInt("/params/data", 1);
-	req.request("/talk/center/to", p.data()); // 700Ð­Òé±¨¾¯ÉÏ±¨
+	req.request("/talk/center/to", p.data()); // 700Ð­ï¿½é±¨ï¿½ï¿½ï¿½Ï±ï¿½
 
 	c600.do_alarm(z);
 	this->cms_broadcast(z);
@@ -527,7 +560,7 @@ void SysSecurity::cms_broadcast(int z)
 	req.request("/talk/broadcast/data", p.data());
 }
 
-//UIÏß³Ì´¦Àí£¬²»ÔÊÐí¹ÒÆð
+//UIï¿½ß³Ì´ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 void SysSecurity::ui_process(void)
 {
 	if (SysAlarm == NULL && SysTalk == NULL) {
@@ -558,7 +591,7 @@ void SysSecurity::do_sos(void)
 		p.setText("/params/event_url", "/msg/alarm/trigger");
 		p.setInt("/params/zone", i);
 		p.setInt("/params/data", 1);
-		req.request("/talk/center/to", p.data()); // 700Ð­Òé±¨¾¯ÉÏ±¨
+		req.request("/talk/center/to", p.data()); // 700Ð­ï¿½é±¨ï¿½ï¿½ï¿½Ï±ï¿½
 
 		c600.do_alarm(i);
 		this->cms_broadcast(i);
@@ -622,10 +655,10 @@ void SysSecurity::rs485_io(uint8_t *d, int sz)
 		return;
 	}
 
-	if (memcmp(p+6, hs_cmd_al, sizeof(hs_cmd_al)) == 0) { //±¨¾¯ÃüÁî
+	if (memcmp(p+6, hs_cmd_al, sizeof(hs_cmd_al)) == 0) { //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 		static int rs485_ok = 0;
 
-		p += 9; //±¨¾¯Êý¾Ý 16¸ö
+		p += 9; //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ 16ï¿½ï¿½
 		if (rs485_ok) {
 			int st[MAX_SECURITY_SZ];
 			for(int i=0; i<MAX_SECURITY_SZ; i++) {

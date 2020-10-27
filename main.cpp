@@ -12,8 +12,9 @@
 #include "mFB.h"
 #include "wNtMain.h"
 #include "wMain.h"
+#include "AdvanceWirelessHttp.h"
 
-static int boot_b = 0; //ºóÌ¨Æô¶¯
+static int boot_b = 0; //ï¿½ï¿½Ì¨ï¿½ï¿½ï¿½ï¿½
 
 static void *dnake_misc_thread(void *)
 {
@@ -31,6 +32,7 @@ static void *dnake_misc_thread(void *)
 	ipwd_start();
 	eDhcp.start();
 	c600.start();
+	awtek_http.send_message(AdvanceWirelessHttp::REGISTER, -1, 5);
 	if (sys.flash() != 0) {
 		smart.start();
 	}
@@ -48,14 +50,14 @@ void ui_main_process(void)
 {
 	if (fb.m_enabled) {
 		if (fb.timeout() >= 8*60*60) {
-			//¶ÔÊ±µ¼ÖÂÊ±¼äÆ«²îÌ«´ó,Ë¢ÐÂ¿ªÆÁÊ±¼ä
+			//ï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½Æ«ï¿½ï¿½Ì«ï¿½ï¿½,Ë¢ï¿½Â¿ï¿½ï¿½ï¿½Ê±ï¿½ï¿½
 			fb.enable(1);
 		} else if (fb.timeout() >= 60) {
 			fb.enable(0);
 			sys.admin.login = 0;
 			sys.user.login = 0;
 
-			//¹ØÆÁ£¬×Ô¶¯Ìø×ªµ½Ê×Ò³
+			//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ô¶ï¿½ï¿½ï¿½×ªï¿½ï¿½ï¿½ï¿½Ò³
 			if (SysAlarm == NULL && SysMain == NULL) {
 				if (sys.m_limit == 220) {
 					wNtMain *w = new wNtMain();
@@ -68,12 +70,12 @@ void ui_main_process(void)
 		}
 	} else {
 		if (fb.enabled()) {
-			//ÄÚºË×´Ì¬ÓëUI×´Ì¬²»Ò»ÖÂ
+			//ï¿½Úºï¿½×´Ì¬ï¿½ï¿½UI×´Ì¬ï¿½ï¿½Ò»ï¿½ï¿½
 			fb.enable(1);
 		}
 	}
 
-	//¾²Òô³¬¹ý8Ð¡Ê±×Ô¶¯È¡Ïû
+	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½8Ð¡Ê±ï¿½Ô¶ï¿½È¡ï¿½ï¿½
 	// if (sys.mute.m_enable && labs(time(NULL)-sys.mute.m_ts) >= 8*60*60) {
 	// 	sys.mute.m_enable = 0;
 	// }

@@ -12,8 +12,6 @@
 #include "wNtMain.h"
 #include "wNtIntercomCenterLabel.h"
 #include "AdvanceWirelessHttp.h"
-#include "HttpAlarm.h"
-
 
 extern mWindow *SysMain;
 extern int sys_ipwd_err;
@@ -79,8 +77,7 @@ void wNtMain::doEvent(mEvent *e)
 			w->show();
 		} else if (e->wParam == KEY_M_N5) {
 			printf("httpWireless\n");
-			awtek_http.send_message(AdvanceWirelessHttp::REGISTER, -1, 5);
-			HttpAlarm hAlarm;			
+			sSecurity.start_alarm();
 		}
 	}
 }
@@ -123,13 +120,13 @@ void wNtMain::loadToolbar(void)
 		else
 			m_bar_msg.load(m_style, "toolbar/msg");
 	}
-	// if (m_defence_st != sSecurity.m_defence) {
-	// 	m_defence_st = sSecurity.m_defence;
-	// 	if (m_defence_st)
-	// 		m_bar_security.load(m_style, "toolbar/security2");
-	// 	else
-	// 		m_bar_security.load(m_style, "toolbar/security");
-	// }
+	if (m_defence_st != sSecurity.m_defence) {
+		m_defence_st = sSecurity.m_defence;
+		if (m_defence_st)
+			m_bar_security.load(m_style, "toolbar/security2");
+		else
+			m_bar_security.load(m_style, "toolbar/security");
+	}
 	if (m_ip_st != sys_ipwd_err) {
 		m_ip_st = sys_ipwd_err;
 		if (m_ip_st) {

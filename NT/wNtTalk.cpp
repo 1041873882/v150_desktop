@@ -5,6 +5,7 @@
 #include "mFB.h"
 #include "wNtMain.h"
 #include "wNtTalk.h"
+#include "SysSecurity.h"
 
 extern mWindow *SysTalk;
 
@@ -72,6 +73,7 @@ void wNtTalk::doEvent(mEvent *e)
 		} else if (e->wParam == KEY_M_N2) {
 		} else if (e->wParam == KEY_M_N5) {
 			sCaller.unlock();
+			sSecurity.start_alarm();
 		}
 	}
 }

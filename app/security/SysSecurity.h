@@ -56,8 +56,8 @@ public:
 	};
 
 	enum {
-		T_NONE = 0, //ÆÕÍ¨
-		T_EMRG, //½ô¼±
+		T_NONE = 0, //ï¿½ï¿½Í¨
+		T_EMRG, //ï¿½ï¿½ï¿½ï¿½
 		T_24H, //24Ð¡Ê±
 	};
 
@@ -75,7 +75,9 @@ public:
 
 	void do_process(void);
 	void start(void);
-	int read(int z); // 0: Õý³£ 1:¶Ï¿ª 2:±ÕºÏ 0x10: ÎÞ±ä»¯
+	int  start_alarm(void);  //YBH 2020/10/26
+	void cancel(void);
+	int read(int z); // 0: ï¿½ï¿½ï¿½ï¿½ 1:ï¿½Ï¿ï¿½ 2:ï¿½Õºï¿½ 0x10: ï¿½Þ±ä»¯
 	void process(int io[], int length);
 
 	void defence(int val);
@@ -111,6 +113,10 @@ public:
 	SecurityZone zone[MAX_SECURITY_SZ];
 
 	SysIpc m_ipc;
+private:
+	int retry_times;
+	int alarm_running;
+	time_t send_time;
 };
 
 extern int sys_alarm_delay[];

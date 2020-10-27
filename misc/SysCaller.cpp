@@ -43,8 +43,6 @@ void SysCaller::query(const char *id)
 	gettimeofday(&m_tv, NULL);
 	strcpy(m_id, id);
 
-	printf("sscal query = %s\n", id);
-
 	sip.url = NULL;
 	d600.host = NULL;
 	d600.ip = NULL;
@@ -142,7 +140,6 @@ void SysCaller::stop(void)
 			m_h2id[i] = NULL;
 		}
 	}
-
 	m_window = 2;
 }
 

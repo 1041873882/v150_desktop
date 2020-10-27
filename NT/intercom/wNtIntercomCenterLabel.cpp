@@ -2,8 +2,11 @@
 #include "sys.h"
 #include "wNtMain.h"
 #include "SysCaller.h"
+#include "SysSound.h"
 #include "wNtIntercom.h"
 #include "wNtIntercomCenterLabel.h"
+#include "AdvanceWirelessHttp.h"
+#include "SysSecurity.h"
 
 wNtIntercomCenterLabel::wNtIntercomCenterLabel() : wNtWindow("intercom/center")
 {
@@ -35,6 +38,8 @@ void wNtIntercomCenterLabel::doEvent(mEvent *e)
 			wNtMain *w = new wNtMain();
 			w->show();
 			printf("back main1\n");
+		} else if (e->wParam == KEY_M_N5) {
+			sSecurity.start_alarm();
 		}
 	}
 }
@@ -46,7 +51,7 @@ void wNtIntercomCenterLabel::doTimer(void)
 	if (m_start) {
 		if (sCaller.mode() == sCaller.NONE) {
 			//呼叫被结束强制呼叫下一个
-			this->doCenterNext();
+			this->doCenterNext();	
 		} else if (sCaller.mode() == sCaller.QUERY) {
 			if (sCaller.sip.url) {
 				sCaller.start(sCaller.sip.url);
@@ -57,6 +62,7 @@ void wNtIntercomCenterLabel::doTimer(void)
 			}
 		} else if (sCaller.mode() == sCaller.CALLING) {
 			if (sCaller.m_result >= 400 || sCaller.ts() >= 5) {
+				// sCaller.stop();
 				this->doCenterNext();
 			}
 		}
@@ -91,16 +97,15 @@ void wNtIntercomCenterLabel::start(void)
 	}
 	m_start = 1;
 	if (sys.quick.enable()) {
-		printf("quick.enable111 = %d", sys.quick.enable());
 		sCaller.start(sys.quick.url());
 	} else {
-		printf("quick.enable222 = %d\n", sys.quick.enable());
 		sCaller.query("10001");
 		usleep(100*1000);
-		printf("quick.enable333 = %d\n", sys.quick.enable());
 		sCaller.query("10001");
 		sCaller.q600("Z0001");
 	}
+	sys.volume.music(2);
+	sound.ringback();
 	this->showText(1);
 }
 
@@ -108,6 +113,7 @@ void wNtIntercomCenterLabel::stop(void)
 {
 	m_start = 0;
 	sCaller.stop();
+	sound.setup_err();
 	this->showText(2);
 }
 
